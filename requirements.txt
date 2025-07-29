@@ -1,0 +1,4 @@
+ply==3.11
+python-dateutil==2.9.0.post0
+rule-engine==4.5.3
+six==1.17.0
