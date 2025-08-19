@@ -42,10 +42,11 @@ Result:
 ]
 """
 from utils.rule_checker import COL_CHECK_CATEGORY
+from utils.rule_checker.const import CheckerType
 
 
 class COLChecker(object):
-    def __init__(self, check_rule: list, check_data: dict):
+    def __init__(self, check_rule: list, check_data: list):
         self.check_data = check_data
         self.check_rule = check_rule
 
@@ -72,7 +73,9 @@ class COLChecker(object):
                 seen[combination] = idx
         return {
             "_res": len(duplicates) == 0,
-            "_error": duplicates
+            "_error": duplicates,
+            "_cols": cols,
+            "_type": CheckerType.DUPLICATE.value
         }
 
     @classmethod
@@ -83,25 +86,20 @@ class COLChecker(object):
             return getattr(cls, f"_{role}")
         raise AttributeError(f"Method {cls.__name__} has no attribute _{role}")
 
-    def _check_result(self):
-        check_res = []
+    def check_result(self):
         for col_rule in self.check_rule:
             fields = col_rule['field']
             category = col_rule['category']
             if category != COL_CHECK_CATEGORY:
                 continue
             _check_res = self._get_check_rule(col_rule)(fields, self.check_data)
-            check_res.append(_check_res)
-
-        _checks = all([i["_res"] is True for i in check_res])
-        if _checks:
-            return True, []
-        else:
-            return False, check_res
-
-
-
-
-
-
+            check_flag = _check_res["_res"]
+            if not check_flag:
+                return _check_res
+        return {
+            "_res": True,
+            "_error": [],
+            "_cols": [],
+            "_type": ""
+        }
 
